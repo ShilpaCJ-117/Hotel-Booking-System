@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">HotelBook</div>
+</header>
+
+<section class="search">
+    <h2>Complete Your Booking</h2>
+
+    <!-- BOOKING FORM -->
+    <form id="bookingForm">
+
+        <div class="form-group">
+            <label>Hotel Name</label>
+            <input type="text" id="hotelName" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="userName" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="userEmail" required>
+        </div>
+
+        <div class="form-group">
+            <label>Guests</label>
+            <input type="number" id="guestCount" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label>Check-in</label>
+            <input type="date" id="checkinDate" required>
+        </div>
+
+        <div class="form-group">
+            <label>Check-out</label>
+            <input type="date" id="checkoutDate" required>
+        </div>
+
+        <button type="submit">Confirm Booking</button>
+
+    </form>
+
+    <!-- CONFIRMATION BOX (OUTSIDE FORM) -->
+    <div id="confirmation"
+         style="display:none; margin-top:25px; background:white; padding:25px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.15); color:black;">
+        <h3>Booking Confirmed 🎉</h3>
+        <p id="summary"></p>
+        <br>
+        <button onclick="goHome()">Back to Home</button>
+    </div>
+
+</section>
+
+<script>
+
+// Get hotel from URL
+const params = new URLSearchParams(window.location.search);
+const hotel = params.get("hotel");
+
+// Hotel prices
+const hotelPrices = {
+    "Luxury Palace Hotel": 4999,
+    "Sea View Resort": 3499,
+    "Mountain Inn": 2999
+};
+
+// Set hotel name
+if (hotel && hotelPrices[hotel]) {
+    document.getElementById("hotelName").value = hotel;
+} else {
+    alert("Invalid hotel selection!");
+}
+
+// Disable past dates
+const today = new Date().toISOString().split("T")[0];
+document.getElementById("checkinDate").setAttribute("min", today);
+document.getElementById("checkoutDate").setAttribute("min", today);
+
+// Update checkout min when checkin changes
+document.getElementById("checkinDate").addEventListener("change", function() {
+    document.getElementById("checkoutDate").setAttribute("min", this.value);
+});
+
+// Form Submit
+document.getElementById("bookingForm").addEventListener("submit", function(e) {
+
+    e.preventDefault();
+
+    const name = document.getElementById("userName").value;
+    const email = document.getElementById("userEmail").value;
+    const guests = document.getElementById("guestCount").value;
+    const checkin = new Date(document.getElementById("checkinDate").value);
+    const checkout = new Date(document.getElementById("checkoutDate").value);
+
+    if (checkout <= checkin) {
+        alert("Check-out date must be after Check-in date!");
+        return;
+    }
+
+    const nights = (checkout - checkin) / (1000 * 60 * 60 * 24);
+    const total = hotelPrices[hotel] * nights;
+
+    document.getElementById("summary").innerHTML =
+        "<strong>Name:</strong> " + name +
+        "<br><strong>Email:</strong> " + email +
+        "<br><strong>Hotel:</strong> " + hotel +
+        "<br><strong>Guests:</strong> " + guests +
+        "<br><strong>Nights:</strong> " + nights +
+        "<br><strong>Total Price:</strong> ₹" + total;
+
+    document.getElementById("bookingForm").style.display = "none";
+
+    document.getElementById("confirmation").style.display = "block";
+});
+
+function goHome() {
+    window.location.href = "index.html";
+}
+
+</script>
+
+</body>
+</html>
