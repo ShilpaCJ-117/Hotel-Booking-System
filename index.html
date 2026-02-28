@@ -15,6 +15,7 @@
         <a href="#">Rooms</a>
         <a href="#">About</a>
         <a href="#">Contact</a>
+        <a href="admin-login.html" style="color:yellow;">Admin</a>
     </nav>
 </header>
 
@@ -37,7 +38,7 @@
     </form>
 </section>
 
-<section class="hotels" id="hotelsSection">
+<section class="hotels" id="hotelsSection" style="display:none;">
     <h2 class="section-title">Available Hotels</h2>
 </section>
 
@@ -51,6 +52,17 @@
 </footer>
 
 <script>
+
+// Disable past dates
+const today = new Date().toISOString().split("T")[0];
+document.getElementById("checkin").min = today;
+document.getElementById("checkout").min = today;
+
+document.getElementById("checkin").addEventListener("change", function() {
+    document.getElementById("checkout").min = this.value;
+});
+
+// Hotel list (MUST match booking.html + server.js EXACTLY)
 const hotelData = [
     { name: "Luxury Palace Hotel", price: 4999, rating: 5, img: "https://picsum.photos/300/180?1" },
     { name: "Sea View Resort", price: 3499, rating: 5, img: "https://picsum.photos/300/180?2" },
@@ -61,14 +73,13 @@ const hotelData = [
 ];
 
 const hotelsSection = document.getElementById("hotelsSection");
-hotelsSection.style.display = "none";
 
 document.getElementById("searchForm").addEventListener("submit", function(e) {
     e.preventDefault();
 
     const checkin = new Date(document.getElementById("checkin").value);
     const checkout = new Date(document.getElementById("checkout").value);
-    const guests = document.getElementById("guests").value;
+    const guests = parseInt(document.getElementById("guests").value);
 
     if (checkout <= checkin) {
         alert("Check-out date must be after Check-in date!");
@@ -80,24 +91,40 @@ document.getElementById("searchForm").addEventListener("submit", function(e) {
         return;
     }
 
-    alert("Search Successful! Showing Available Hotels ✅");
-
+    // Clear previous hotels
     hotelsSection.innerHTML = `<h2 class="section-title">Available Hotels</h2>`;
 
     hotelData.forEach(hotel => {
+
         const card = document.createElement("div");
         card.className = "hotel-card";
+
+        const button = document.createElement("button");
+        button.innerText = "Book Now";
+        button.onclick = function() {
+            goToBooking(hotel.name);
+        };
+
         card.innerHTML = `
             <img src="${hotel.img}" alt="${hotel.name}">
             <h3>${hotel.name}</h3>
             <p class="rating">${'★'.repeat(hotel.rating)}</p>
             <p class="price">₹${hotel.price} / night</p>
-            <button onclick="window.location.href='booking.html?hotel=${encodeURIComponent(hotel.name)}'">Book Now</button>
         `;
+
+        card.appendChild(button);
         hotelsSection.appendChild(card);
     });
+
     hotelsSection.style.display = "grid";
 });
+
+// Safe redirect
+function goToBooking(hotelName) {
+    const encodedName = encodeURIComponent(hotelName.trim());
+    window.location.href = "booking.html?hotel=" + encodedName;
+}
+
 </script>
 
 </body>
